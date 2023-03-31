@@ -1,0 +1,39 @@
+
+import java_cup.runtime.*;
+
+
+
+terminal String ID;
+terminal If, While, Print, Printline, Return, Else;
+terminal String charlit;
+terminal String Strlit;
+terminal Integer INTLIT;
+terminal double Floatlit;
+terminal String INT;
+terminal String Char;
+terminal string Float;
+terminal String Bool;
+terminal True;
+terminal False;
+terminal Mult, Div;
+terminal comments, multiple_comments;
+terminal cls;
+terminal incre, decre;
+terminal lessthanequalto, greaterthanequalto, greaterthan, lessthan;
+terminal Add,Subtract,Multiply,Divide;
+terminal And, Or;
+terminal Not;
+terminal doubleequalto;
+terminal Void;
+terminal Final;
+terminal negate;
+
+
+terminal open_round, closeround, opensquare, closesquare, opencurly, closecurly;
+terminal semicolon, comma, questions, colon, equalto;
+
+
+
+
+non terminal dummy;
+dummy ::= ;

@@ -1,0 +1,1 @@
+README1. Extract the folder from zip.2. Open terminal and go the folder location3. Type the command “make run” to run the program4. The input file is abc.txt file. Type the input into abc.txt file5. The output would be generated in out.txt file
