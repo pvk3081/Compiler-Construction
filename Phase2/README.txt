@@ -1,3 +1,6 @@
+In this phase, we will work on implementing our parser. We will scan a file of
+tokens and translate it into an Abstract Syntax Tree
+
 Steps to run the program :
 
 1. Unzip the file.
