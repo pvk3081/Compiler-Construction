@@ -1,0 +1,303 @@
+
+import java_cup.runtime.*;
+
+
+
+terminal String ID;
+terminal If, While, Print, Printline, Return, Else;
+terminal String charlit;
+terminal String Strlit;
+terminal READ;
+terminal int INTLIT;
+terminal float Floatlit;
+terminal String INT;
+terminal String Char;
+terminal string Float;
+terminal String Bool;
+terminal True;
+terminal False;
+terminal comments, multiple_comments;
+terminal cls;
+terminal incre, decre;
+terminal lessthanequalto, greaterthanequalto, greaterthan, lessthan;
+terminal Add,Subtract,Multiply,Divide;
+terminal And, Or;
+terminal Not;
+terminal doubleequalto;
+terminal Void;
+terminal Final;
+terminal negate;
+
+
+terminal open_round, closeround, opensquare, closesquare, opencurly, closecurly;
+terminal semicolon, comma, questions, colon, equalto;
+
+non terminal Returntype returntype;
+non terminal String type;
+
+non terminal Boolean optionalsemi;
+non terminal String optionalfinal;
+
+non terminal ClassMembers classmembers;
+non terminal Member_declarations declare_members;
+non terminal Method_declarations declare_methods;
+non terminal Method_declarations_plu declare_methods2;
+non terminal ArgDec ad;
+non terminal ArgDecs ads;
+non terminal ArgdecList adl;
+non terminal FieldDeclarations fd;
+non terminal FieldDeclare fc;
+non terminal Statement stmt;
+non terminal Statements statements;
+non terminal Statement ifEnd;
+non terminal Name name;
+non terminal Args args;
+non terminal Program program;
+non terminal ReadList readlist;
+non terminal PrintList printlist;
+non terminal Printlinelist pll;
+non terminal Expression expr;
+non terminal Expression optionalexpr;
+non terminal BinaryOper binaryoper;
+
+precedence left Else;
+precedence left equalto;
+precedence left questions;
+precedence left Or, And;
+precedence left negate, doubleequalto;
+precedence left lessthanequalto, greaterthanequalto, greaterthan, lessthan;
+precedence left Add,Subtract;
+precedence left Multiply,Divide;
+precedence right Not;
+precedence right incre, decre;
+
+
+
+program ::= cls ID:a opencurly declare_members:d closecurly
+            {: RESULT = new Program(a,d);   :}
+            ;
+
+
+/*
+program ::= stmt:dm 
+            {: RESULT = new Program(dm);   :}
+            ;
+*/
+
+classmembers ::= 	fc:fd classmembers:cms
+             		{: RESULT = new ClassMembers(fd, cms);  :}
+					| declare_methods: md declare_methods2:mds
+					{: RESULT = new ClassMembers(md, mds);  :}
+					| {: RESULT = new ClassMembers();  :}
+					;
+
+declare_members ::= classmembers: cms
+            	{:  RESULT = new Member_declarations(cms);  :}
+            	;
+
+fc ::=	Final type:t ID:id optionalexpr:opex semicolon
+				{: RESULT = new FieldDeclare(true, t, id, opex); :}
+				|	type:t ID:id optionalexpr:opex semicolon
+				{: RESULT = new FieldDeclare(false, t, id, opex); :}
+				|	type:t ID:id opensquare INTLIT:len closesquare semicolon
+				{: RESULT = new FieldDeclare(t, id, len); :}
+				;
+
+
+fd  ::=		fc:f fd:fs
+					{: RESULT = new FieldDeclarations(f,fs); :}
+               | {: RESULT = new FieldDeclarations(); :}
+					;
+
+declare_methods ::= type:rt ID:id open_round ads:ads closeround opencurly fd:fd statements:s closecurly optionalsemi:os
+                {: RESULT = new Method_declarations(rt,id,ads,fd,s,os); :}
+                | Void ID:id open_round ads:as closeround opencurly fd:fs statements:sts closecurly optionalsemi:os
+				{: RESULT = new Method_declarations("void", id, as, fs, sts, os); :}
+            ;
+
+declare_methods2 ::= declare_methods:dm declare_methods2:dmm
+                        {: RESULT = new Method_declarations_plu(dm,dmm);   :}
+                        | 
+					         {: RESULT = new Method_declarations_plu(); :}
+                        ;
+
+
+ads ::= adl:al
+        {: RESULT = new ArgDecs(al);   :}
+        | {: RESULT = new ArgDecs(); :}
+        ;
+
+ad ::= type:t ID:id
+        {: RESULT = new ArgDec(t,id,false);   :}
+       | type:t ID:id opensquare closesquare
+        {: RESULT = new ArgDec(t,id,true);   :}
+            ;
+
+adl ::= ad:a comma adl:al
+         {: RESULT = new ArgdecList(a,al);   :}
+         | ad:a
+         {: RESULT = new ArgdecList(a);   :}
+         ;
+
+
+        
+returntype ::= type:t
+                {: RESULT = new Returntype(t); :}
+                ;
+
+optionalsemi ::= 	semicolon
+					{: RESULT = true; :}
+					|
+					{: RESULT = false; :}
+					;
+            
+
+optionalexpr ::=	equalto expr:e
+					{: RESULT = e; :}
+					|
+					{: RESULT = null; :}
+					;
+
+type ::=  INT
+			{: RESULT = "int"; :}
+		 |	Bool
+			{: RESULT = "bool"; :}
+		 | Char
+			{: RESULT = "char"; :}
+         | 	Float
+			{: RESULT = "float"; :}
+			;
+
+statements ::= stmt:s statements:s2
+                {: RESULT = new Statements(s,s2); :}
+                | {: RESULT = new Statements(); :}
+			   ;
+
+stmt ::= If open_round expr:e closeround stmt:s ifEnd:ie
+            {: RESULT = new Statement(e, s, ie);  :}
+         |  While open_round expr:e closeround stmt:st
+			{: RESULT = new Statement(e, st); :}
+         |	name:n equalto expr:e semicolon
+			{: RESULT = new Statement(n, e); :}
+         |	READ open_round readlist:rl closeround semicolon
+			{: RESULT = new Statement(rl); :}
+         |  Print open_round printlist:pl closeround semicolon
+			{: RESULT = new Statement(pl); :}
+         | Printline open_round pll:pll closeround semicolon
+			{: RESULT = new Statement(pll); :}
+         | ID:id open_round closeround semicolon
+             {: RESULT = new Statement(id); :}
+         |	ID:id open_round args:args closeround semicolon
+			{: RESULT = new Statement(id, args); :}
+         | 	Return semicolon
+			{: RESULT = new Statement(); :}
+         |  Return expr:e semicolon
+            {: RESULT = new Statement(e); :}
+         | name:n incre semicolon
+            {: RESULT = new Statement(n,"++"); :}
+         | name:n decre semicolon
+            {: RESULT = new Statement(n,"--"); :}
+         |  opencurly fd:field stmt:s closecurly optionalsemi:os
+			{: RESULT = new Statement(field, s, os); :}
+            ;
+
+
+ifEnd ::=	Else stmt:st
+			{: RESULT = st; :}
+			|
+			{: RESULT = null; :}
+			;
+
+
+name ::=  ID:id
+		{: RESULT = new Name(id); :}
+        |  ID:id opensquare expr:e closesquare
+		{: RESULT = new Name(id, e); :}
+		;
+
+args ::=   expr:e
+            {: RESULT = new Args(e);   :}
+            | expr:e comma args:args 
+            {: RESULT = new Args(e,args);   :}
+            ;
+
+
+readlist ::= name:n comma readlist:rl 
+                {: RESULT = new ReadList(n,rl);  :}
+               | name:n
+                {: RESULT = new ReadList(n);  :}
+                ;
+
+printlist ::= expr:e
+              {: RESULT = new PrintList(e); :}
+             | expr:e comma printlist:printlist
+              {: RESULT = new PrintList(e,printlist); :}
+            ;
+
+pll ::= printlist : pp
+        {: RESULT = new Printlinelist(pp); :}
+		| {: RESULT = new Printlinelist(); :}
+		;
+
+
+expr ::= name:n
+         {: RESULT = new Expression(n);  :}
+         | ID:id open_round closeround
+		   {: RESULT = new Expression(id, (Args) null);  :}
+         | ID:id open_round args:a closeround
+			{: RESULT = new Expression(id, a);  :}
+         | INTLIT:il
+         {: RESULT = new Expression(il);  :}
+         | charlit:cl 
+			{: RESULT = new Expression(cl, "characters");  :}
+		 | Strlit:sl 
+			{: RESULT = new Expression(sl, "str");  :}
+         | binaryoper:bo
+			{: RESULT = new Expression(bo);  :}
+         | Floatlit:fll 
+			{: RESULT = new Expression(fll);  :}
+         | True
+			{: RESULT = new Expression(true);  :}
+		 | False
+			{: RESULT = new Expression(false);  :}
+         | open_round expr:e closeround
+			{: RESULT = new Expression(e, "Expr_inround");  :}
+         | Not expr:e 
+			{: RESULT = new Expression(e, "~");  :}
+		 | Subtract expr:e
+			{: RESULT = new Expression(e, "-");  :} %prec Subtract
+		 | Add expr:e
+			{: RESULT = new Expression(e, "+");  :} %prec Add
+         | open_round type:t closeround expr:e
+			{: RESULT = new Expression(t, e);  :}
+         | open_round expr:e1 questions expr:e2 colon expr:e3 closeround
+			{: RESULT = new Expression(e1, e2, e3);  :}
+         ;
+
+binaryoper ::= expr:e1 Divide expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "/");  :}
+               | expr:e1 Add expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "+");  :}
+               | expr:e1 Multiply expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "*");  :}
+               | expr:e1 Subtract expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "-");  :}
+               | expr:e1 greaterthan expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, ">");  :}
+               | expr:e1 lessthan expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "<");  :}
+               | expr:e1 greaterthanequalto expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, ">=");  :}
+               | expr:e1 lessthanequalto expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "<=");  :}
+               | expr:e1 doubleequalto expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "==");  :}
+               | expr:e1 negate expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "<>");  :}
+               | expr:e1 Or expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "||");  :}
+               | expr:e1 And expr:e2
+			   {: RESULT = new BinaryOper(e1, e2, "&&");  :}
+               ;
+               
+
